@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UFO vs. Asteroids</title>
+    <style>
+        #game-board {
+            width: 800px;
+            height: 600px;
+            margin: 0 auto;
+            border: 1px solid #000;
+        }
+        .ufo {
+            width: 50px;
+            height: 50px;
+            background-color: #00ff00;
+            position: absolute;
+        }
+        .asteroid {
+            width: 30px;
+            height: 30px;
+            background-color: #ff0000;
+            position: absolute;
+        }
+        .cheese {
+            width: 60px;
+            height: 60px;
+            background-color: #ffff00;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-board">
+        <div id="ufo" class="ufo"></div>
+    </div>
+
+    <script>
+        // Game variables
+        var gameBoard = document.getElementById("game-board");
+        var ufo = document.getElementById("ufo");
+        var asteroids = [];
+        var cheese = null;
+
+        var ufoX = 375;
+        var ufoY = 525;
+        var ufoSpeed = 10;
+
+        var asteroidSpeed = 3;
+        var asteroidInterval = 1000;
+
+        var score = 0;
+
+        // Event listener for UFO movement
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "ArrowLeft" && ufoX > 0) {
+                ufoX -= ufoSpeed;
+            }
+            else if (event.key === "ArrowRight" && ufoX < 750) {
+                ufoX += ufoSpeed;
+            }
+            ufo.style.left = ufoX + "px";
+        });
+
+        // Start the game
+        function startGame() {
+            // Create asteroids at regular intervals
+            setInterval(function () {
+                var asteroid = document.createElement("div");
+                asteroid.className = "asteroid";
+                asteroid.style.left = Math.floor(Math.random() * 770) + "px";
+                gameBoard.appendChild(asteroid);
+                asteroids.push(asteroid);
+            }, asteroidInterval);
+
+            // Move asteroids downwards
+            setInterval(function () {
+                for (var i = 0; i < asteroids.length; i++) {
+                    var currentTop = parseInt(asteroids[i].style.top);
+                    if (currentTop >= 570) {
+                        // Asteroid reached the bottom, remove it
+                        asteroids[i].remove();
+                        asteroids.splice(i, 1);
+                        score++;
+                    }
+                    else {
+                        asteroids[i].style.top = currentTop + asteroidSpeed + "px";
+                    }
+                }
+            }, 30);
+
+            // Check for collisions
+            setInterval(function () {
+                for (var i = 0; i < asteroids.length; i++) {
+                    var asteroidRect = asteroids[i].getBoundingClientRect();
+                    var ufoRect = ufo.getBoundingClientRect();
+
+                    if (
+                        asteroidRect.left < ufoRect.right &&
+                        asteroidRect.right > ufoRect.left &&
+                        asteroidRect.bottom > ufoRect.top &&
+                        asteroidRect.top < ufoRect.bottom
+                    ) {
+                        // Collision occurred, end the game
+                        endGame();
+                    }
+                }
+            }, 30);
+
+            // Spawn the cheese boss after a certain time
+            setTimeout(function () {
+                cheese = document.createElement("div");
+                cheese.className = "cheese";
+                cheese.style.left = "370px";
+                gameBoard.appendChild(cheese);
+            }, 5000);
+        }
+
+        // End the game
+        function endGame() {
+            clearInterval(asteroidInterval);
+            alert("Game Over! Your score: " + score);
+            location.reload();
+        }
+
+        // Start the game
+        startGame();
+    </script>
+</body>
+</html>
